@@ -1,0 +1,26 @@
+Flask
+gunicorn
+python-dotenv
+flask-cors
+openai
+google-generativeai
+# Google Cloud
+google-cloud-aiplatform
+google-cloud-logging
+google-cloud-storage
+
+# Database
+psycopg2-binary
+pgvector
+
+# Encryption
+cryptography
+
+# Image processing
+Pillow
+qrcode
+
+# Utilities
+numpy
+tiktoken
+python-dateutil

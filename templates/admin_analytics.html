@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Analytics Dashboard - LoveUAD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Login Screen */
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-container h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .login-container p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .login-container input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .login-container button:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-container button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        /* Dashboard */
+        #dashboardScreen {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-header h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .sub-value {
+            color: #999;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .chart-container h2 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 300px;
+        }
+
+        .survey-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .survey-table th,
+        .survey-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .survey-table th {
+            background: #f8f8f8;
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .survey-table td {
+            color: #333;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-low {
+            background: #fee;
+            color: #c33;
+        }
+
+        .badge-medium {
+            background: #fef7e0;
+            color: #d97706;
+        }
+
+        .badge-high {
+            background: #e0f7e0;
+            color: #2d8659;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 300px;
+            padding: 20px 0;
+            border-bottom: 2px solid #333;
+        }
+
+        .bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 100px;
+        }
+
+        .bar-stack {
+            width: 100%;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+
+        .bar-segment {
+            width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .bar-segment:hover {
+            opacity: 0.8;
+        }
+
+        .bar-low {
+            background: #ef4444;
+        }
+
+        .bar-medium {
+            background: #f59e0b;
+        }
+
+        .bar-high {
+            background: #10b981;
+        }
+
+        .bar-label {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .line-chart {
+            position: relative;
+            height: 300px;
+            padding: 20px;
+        }
+
+        .line-chart svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .metric-improvement {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .metric-improvement h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .metric-improvement .value {
+            font-size: 48px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .logout-btn {
+                position: static;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <h1>🔒 Admin Access</h1>
+            <p>Enter password to view analytics dashboard</p>
+            <div class="error-message" id="errorMessage"></div>
+            <input 
+                type="password" 
+                id="adminPassword" 
+                placeholder="Enter admin password"
+                onkeypress="if(event.key === 'Enter') loginAdmin()"
+            >
+            <button onclick="loginAdmin()">Access Dashboard</button>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboardScreen">
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+
+        <div class="dashboard-header">
+            <h1>📊 LoveUAD Analytics Dashboard</h1>
+            <p>NHS-Compliant Anonymous Analytics • Zero PII • Aggregated Data Only</p>
+        </div>
+
+        <!-- Overview Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Patient Accounts</h3>
+                <div class="value" id="totalPatients">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Caregivers</h3>
+                <div class="value" id="totalCaregivers">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Users (7 Days)</h3>
+                <div class="value" id="activeUsers">-</div>
+                <div class="sub-value">Logged in recently</div>
+            </div>
+            <div class="stat-card">
+                <h3>Survey Responses</h3>
+                <div class="value" id="totalSurveys">-</div>
+                <div class="sub-value" id="uniqueRespondents"></div>
+            </div>
+        </div>
+
+        <!-- Survey Analysis -->
+        <div class="chart-container">
+            <h2>📋 Caregiver Burden Survey Results</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                Results categorized by burden level: Low (0-13), Medium (14-26), High (27-40)
+            </p>
+            <div id="surveyChart" class="bar-chart"></div>
+            
+            <div id="improvementMetric" class="metric-improvement" style="display: none;">
+                <h3>📉 Burden Reduction (Day 30 → Day 90)</h3>
+                <div class="value" id="improvementValue">-</div>
+            </div>
+
+            <h3 style="margin-top: 30px; color: #333;">Recent Survey Completions</h3>
+            <table class="survey-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Responses</th>
+                        <th>Burden Level</th>
+                    </tr>
+                </thead>
+                <tbody id="recentSurveys">
+                    <tr><td colspan="3" class="loading">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DAU Chart -->
+        <div class="chart-container">
+            <h2>📱 Daily Active Users (Last 30 Days)</h2>
+            <div id="dauChart" class="line-chart">
+                <canvas id="dauCanvas" width="800" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- Hourly Distribution -->
+        <div class="chart-container">
+            <h2>⏰ Usage by Hour of Day (Last 7 Days Average)</h2>
+            <div id="hourlyChart" class="line-chart">
+                <canvas id="hourlyCanvas" width="800" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://loveuad.com';
+        let authToken = null;
+
+        // Check if already logged in on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedToken = sessionStorage.getItem('adminToken');
+            if (savedToken) {
+                authToken = savedToken;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboardScreen').style.display = 'block';
+                loadDashboardData();
+            }
+        });
+
+        // Login
+        async function loginAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            const errorMsg = document.getElementById('errorMessage');
+
+            if (!password) {
+                errorMsg.textContent = 'Please enter password';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/verify-password`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({password})
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    authToken = data.token;
+                    sessionStorage.setItem('adminToken', authToken); // Save to session
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('dashboardScreen').style.display = 'block';
+                    loadDashboardData();
+                } else {
+                    errorMsg.textContent = 'Invalid password';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Connection error';
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // Logout
+        function logout() {
+            authToken = null;
+            sessionStorage.removeItem('adminToken'); // Clear session
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        // Load Dashboard Data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(`${API_URL}/api/admin/dashboard-stats`);
+                const data = await response.json();
+
+                if (data.success) {
+                    renderDashboard(data.stats);
+                }
+            } catch (error) {
+                console.error('Failed to load dashboard:', error);
+            }
+        }
+
+        // Render Dashboard
+        function renderDashboard(stats) {
+            // Overview stats
+            document.getElementById('totalPatients').textContent = stats.accounts.total_patients.toLocaleString();
+            document.getElementById('totalCaregivers').textContent = stats.accounts.total_caregivers.toLocaleString();
+            document.getElementById('activeUsers').textContent = stats.accounts.active_users.toLocaleString();
+            document.getElementById('totalSurveys').textContent = stats.survey.total_responses.toLocaleString();
+            document.getElementById('uniqueRespondents').textContent = 
+                `${stats.survey.unique_respondents} unique respondents`;
+
+            // Survey chart
+            renderSurveyChart(stats.survey);
+
+            // Improvement metric
+            if (stats.survey.improvement_percentage > 0) {
+                document.getElementById('improvementMetric').style.display = 'block';
+                document.getElementById('improvementValue').textContent = 
+                    `${stats.survey.improvement_percentage}%`;
+            }
+
+            // Recent surveys table
+            renderRecentSurveys(stats.survey.recent_responses);
+
+            // DAU chart
+            renderDAUChart(stats.dau.daily_totals);
+
+            // Hourly chart
+            renderHourlyChart(stats.dau.hourly_average);
+        }
+
+        // Render Survey Chart
+        function renderSurveyChart(surveyData) {
+            const container = document.getElementById('surveyChart');
+            container.innerHTML = '';
+
+            const days = ['Day 30', 'Day 60', 'Day 90'];
+            const maxTotal = Math.max(...days.map(day => 
+                surveyData.by_day[day] ? surveyData.by_day[day].total : 0
+            ));
+
+            days.forEach(day => {
+                const dayData = surveyData.by_day[day] || {Low: 0, Medium: 0, High: 0, total: 0};
+                const group = document.createElement('div');
+                group.className = 'bar-group';
+
+                const stack = document.createElement('div');
+                stack.className = 'bar-stack';
+
+                ['Low', 'Medium', 'High'].forEach(level => {
+                    const count = dayData[level] || 0;
+                    if (count > 0) {
+                        const segment = document.createElement('div');
+                        segment.className = `bar-segment bar-${level.toLowerCase()}`;
+                        segment.style.height = `${(count / maxTotal) * 250}px`;
+                        segment.textContent = count;
+                        segment.title = `${level}: ${count} responses`;
+                        stack.appendChild(segment);
+                    }
+                });
+
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = day;
+
+                group.appendChild(stack);
+                group.appendChild(label);
+                container.appendChild(group);
+            });
+        }
+
+        // Render Recent Surveys
+        function renderRecentSurveys(surveys) {
+            const tbody = document.getElementById('recentSurveys');
+            tbody.innerHTML = '';
+
+            if (surveys.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">No responses yet</td></tr>';
+                return;
+            }
+
+            surveys.forEach(survey => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(survey.date).toLocaleDateString()}</td>
+                    <td>${survey.count}</td>
+                    <td><span class="badge badge-${survey.bucket.toLowerCase()}">${survey.bucket}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Render DAU Chart
+        function renderDAUChart(dailyData) {
+            const canvas = document.getElementById('dauCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            if (dailyData.length === 0) return;
+
+            const maxCount = Math.max(...dailyData.map(d => d.count));
+            const points = dailyData.reverse().map((d, i) => ({
+                x: (i / (dailyData.length - 1)) * (width - 40) + 20,
+                y: height - 40 - ((d.count / maxCount) * (height - 60)),
+                count: d.count,
+                date: d.date
+            }));
+
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = 20 + (i * (height - 60) / 5);
+                ctx.beginPath();
+                ctx.moveTo(20, y);
+                ctx.lineTo(width - 20, y);
+                ctx.stroke();
+            }
+
+            // Draw line
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            points.forEach((p, i) => {
+                if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+
+            // Draw points
+            points.forEach(p => {
+                ctx.fillStyle = '#764ba2';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            points.forEach((p, i) => {
+                if (i % Math.ceil(points.length / 7) === 0) {
+                    ctx.fillText(new Date(p.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}), 
+                                 p.x, height - 10);
+                }
+            });
+        }
+
+        // Render Hourly Chart
+        function renderHourlyChart(hourlyData) {
+            const canvas = document.getElementById('hourlyCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            if (hourlyData.length === 0) return;
+
+            const maxAvg = Math.max(...hourlyData.map(d => d.avg));
+            const barWidth = (width - 40) / 24;
+
+            // Draw bars
+            hourlyData.forEach((d, i) => {
+                const barHeight = (d.avg / maxAvg) * (height - 60);
+                const x = 20 + (i * barWidth);
+                const y = height - 40 - barHeight;
+
+                ctx.fillStyle = '#667eea';
+                ctx.fillRect(x, y, barWidth - 2, barHeight);
+
+                // Hour label
+                if (i % 3 === 0) {
+                    ctx.fillStyle = '#666';
+                    ctx.font = '12px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${d.hour}:00`, x + barWidth / 2, height - 10);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
