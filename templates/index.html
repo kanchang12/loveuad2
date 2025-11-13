@@ -1447,6 +1447,85 @@
             </div>
         </div>
     </div>
+    <!-- Brain Games Screen -->
+<div class="aiAnalysis-screen" id="brainGamesScreen">
+    <div class="screen-header">
+        <button class="back-btn" onclick="closeBrainGamesScreen()">← Back</button>
+        <div class="screen-title">🧠 Brain Games</div>
+    </div>
+    <div class="screen-content">
+        <!-- Game Selection -->
+        <div id="gameSelection">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="font-size: 72px; margin-bottom: 16px;">🧠</div>
+                <h2 style="font-size: 28px; font-weight: 900; color: var(--text-primary); margin-bottom: 12px;">Choose a Game</h2>
+                <p style="font-size: 16px; color: var(--text-secondary); font-weight: 600;">Fun exercises to keep your mind active</p>
+            </div>
+            
+            <div style="display: grid; gap: 20px; max-width: 600px; margin: 0 auto;">
+                <div class="feature-btn" onclick="startGame('math')" style="padding: 32px; border: 3px solid var(--accent-primary);">
+                    <div class="feature-btn-icon" style="font-size: 56px;">🌸</div>
+                    <div class="feature-btn-label" style="font-size: 22px;">Math Garden</div>
+                    <div style="font-size: 14px; color: var(--text-secondary); margin-top: 8px; font-weight: 600;">Simple addition & subtraction</div>
+                </div>
+                
+                <div class="feature-btn" onclick="startGame('words')" style="padding: 32px; border: 3px solid #48bb78;">
+                    <div class="feature-btn-icon" style="font-size: 56px;">💬</div>
+                    <div class="feature-btn-label" style="font-size: 22px;">Word Friends</div>
+                    <div style="font-size: 14px; color: var(--text-secondary); margin-top: 8px; font-weight: 600;">Say related words together</div>
+                </div>
+                
+                <div class="feature-btn" onclick="startGame('memory')" style="padding: 32px; border: 3px solid #f59e0b;">
+                    <div class="feature-btn-icon" style="font-size: 56px;">🎯</div>
+                    <div class="feature-btn-label" style="font-size: 22px;">Remember & Repeat</div>
+                    <div style="font-size: 14px; color: var(--text-secondary); margin-top: 8px; font-weight: 600;">Practice your memory</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Play Area -->
+        <div id="gamePlayArea" style="display: none;">
+            <div style="background: var(--bg-card); border-radius: 24px; padding: 32px; box-shadow: var(--shadow-lg); text-align: center;">
+                <div id="gameTitle" style="font-size: 28px; font-weight: 900; margin-bottom: 24px; color: var(--accent-primary);"></div>
+                
+                <!-- Score Display -->
+                <div style="display: flex; justify-content: center; gap: 24px; margin-bottom: 32px; flex-wrap: wrap;">
+                    <div style="background: linear-gradient(135deg, #48bb78, #38a169); color: white; padding: 16px 24px; border-radius: 16px; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 4px;">✓ Correct</div>
+                        <div id="correctScore" style="font-size: 32px; font-weight: 900;">0</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 16px 24px; border-radius: 16px; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 4px;">📝 Total</div>
+                        <div id="totalScore" style="font-size: 32px; font-weight: 900;">0</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 16px 24px; border-radius: 16px; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 4px;">⏱️ Time</div>
+                        <div id="gameTimer" style="font-size: 32px; font-weight: 900;">0:00</div>
+                    </div>
+                </div>
+                
+                <!-- Question Display -->
+                <div id="questionDisplay" style="background: var(--bg-primary); padding: 48px 32px; border-radius: 20px; margin-bottom: 32px; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div id="questionEmoji" style="font-size: 64px; margin-bottom: 24px;">🌸</div>
+                    <div id="questionText" style="font-size: 32px; font-weight: 900; color: var(--text-primary); margin-bottom: 24px;"></div>
+                </div>
+                
+                <!-- Answer Input -->
+                <div id="answerInput" style="margin-bottom: 24px;"></div>
+                
+                <!-- Voice Status -->
+                <div id="gameVoiceStatus" style="display: none; margin-top: 16px; padding: 12px 20px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; text-align: center; font-weight: 700; color: var(--accent-primary);">
+                    🎤 Listening...
+                </div>
+                
+                <!-- Controls -->
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="endGame()" style="padding: 14px 28px; margin: 0;">End Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
@@ -1579,6 +1658,10 @@ function renderDashboardFeatures() {
                     <div class="feature-btn-icon">�</div>
                     <div class="feature-btn-label">Medicines</div>
                 </div>
+            <div class="feature-btn patient-btn" onclick="startBrainGames()">
+            <div class="feature-btn-icon">🧠</div>
+            <div class="feature-btn-label">Brain Games</div>
+        </div>
             `;
         } else {
             // Free tier patients: No camera
@@ -3980,6 +4063,400 @@ function handleInternalNavigation(screen) {
     } else if (screen === 'calendar') {
         document.getElementById('calendarScreen').classList.add('active');
     }
+}
+
+    // ==================== BRAIN GAMES ====================
+
+let currentGame = null;
+let gameStartTime = null;
+let gameTimerInterval = null;
+let gameScore = { correct: 0, total: 0 };
+let currentQuestion = null;
+let gameRecognition = null;
+
+function startBrainGames() {
+    document.getElementById("dashboardScreen").classList.remove("active");
+    document.getElementById("brainGamesScreen").classList.add("active");
+    pushNavigation('brainGames');
+    
+    // Show game selection, hide game play
+    document.getElementById('gameSelection').style.display = 'block';
+    document.getElementById('gamePlayArea').style.display = 'none';
+}
+
+function closeBrainGamesScreen() {
+    if (currentGame) {
+        if (confirm("End current game?")) {
+            endGame();
+        } else {
+            return;
+        }
+    }
+    
+    document.getElementById("brainGamesScreen").classList.remove("active");
+    document.getElementById("dashboardScreen").classList.add("active");
+    popNavigation();
+}
+
+function startGame(gameType) {
+    currentGame = gameType;
+    gameStartTime = Date.now();
+    gameScore = { correct: 0, total: 0 };
+    
+    // Hide selection, show game
+    document.getElementById('gameSelection').style.display = 'none';
+    document.getElementById('gamePlayArea').style.display = 'block';
+    
+    // Set game title and emoji
+    const titles = {
+        'math': { title: '🌸 Math Garden', emoji: '🌸' },
+        'words': { title: '💬 Word Friends', emoji: '💬' },
+        'memory': { title: '🎯 Remember & Repeat', emoji: '🎯' }
+    };
+    
+    document.getElementById('gameTitle').textContent = titles[gameType].title;
+    document.getElementById('questionEmoji').textContent = titles[gameType].emoji;
+    
+    // Start timer
+    startGameTimer();
+    
+    // Initialize speech recognition
+    initGameSpeechRecognition();
+    
+    // Load first question
+    nextQuestion();
+}
+
+function startGameTimer() {
+    let seconds = 0;
+    gameTimerInterval = setInterval(() => {
+        seconds++;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        document.getElementById('gameTimer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+function initGameSpeechRecognition() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        console.log('Speech recognition not supported');
+        return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    gameRecognition = new SpeechRecognition();
+    gameRecognition.continuous = false;
+    gameRecognition.interimResults = false;
+    gameRecognition.lang = 'en-US';
+    
+    gameRecognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        document.getElementById('gameVoiceStatus').style.display = 'none';
+        handleGameAnswer(transcript);
+    };
+    
+    gameRecognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        document.getElementById('gameVoiceStatus').style.display = 'none';
+        if (event.error === 'no-speech') {
+            showToast('⚠️ No speech detected. Try again.');
+            startGameVoiceInput();
+        }
+    };
+    
+    gameRecognition.onend = function() {
+        document.getElementById('gameVoiceStatus').style.display = 'none';
+    };
+}
+
+function nextQuestion() {
+    if (currentGame === 'math') {
+        showMathQuestion();
+    } else if (currentGame === 'words') {
+        showWordsQuestion();
+    } else if (currentGame === 'memory') {
+        showMemoryQuestion();
+    }
+}
+
+// ==================== MATH GARDEN ====================
+
+function showMathQuestion() {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    const operation = Math.random() > 0.5 ? '+' : '-';
+    
+    let question, answer;
+    if (operation === '+') {
+        question = `${num1} + ${num2}`;
+        answer = num1 + num2;
+    } else {
+        // Ensure no negative answers
+        const larger = Math.max(num1, num2);
+        const smaller = Math.min(num1, num2);
+        question = `${larger} - ${smaller}`;
+        answer = larger - smaller;
+    }
+    
+    currentQuestion = { text: question, answer: answer.toString() };
+    
+    document.getElementById('questionText').textContent = question + ' = ?';
+    
+    // Voice: Ask the question
+    speakText(`What is ${question.replace('+', 'plus').replace('-', 'minus')}?`);
+    
+    // Show answer input
+    document.getElementById('answerInput').innerHTML = `
+        <input type="number" id="mathAnswer" placeholder="Your answer" 
+               style="font-size: 28px; padding: 16px; text-align: center; border: 3px solid var(--accent-primary); border-radius: 16px; width: 200px; font-weight: 900;"
+               onkeypress="if(event.key==='Enter') submitMathAnswer()">
+        <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: center;">
+            <button class="btn btn-primary" onclick="submitMathAnswer()">Submit Answer</button>
+            <button class="btn btn-secondary" onclick="startGameVoiceInput()" style="background: var(--accent-gradient);">🎤 Say Answer</button>
+        </div>
+    `;
+    
+    // Auto-focus input
+    setTimeout(() => document.getElementById('mathAnswer')?.focus(), 100);
+}
+
+function submitMathAnswer() {
+    const userAnswer = document.getElementById('mathAnswer')?.value;
+    if (!userAnswer) {
+        showToast('Please enter an answer');
+        return;
+    }
+    handleGameAnswer(userAnswer);
+}
+
+// ==================== WORD FRIENDS ====================
+
+const wordCategories = {
+    animals: ['dog', 'cat', 'bird', 'fish', 'horse', 'cow', 'pig', 'sheep', 'chicken', 'duck'],
+    foods: ['apple', 'bread', 'milk', 'cheese', 'egg', 'rice', 'pasta', 'potato', 'carrot', 'banana'],
+    colors: ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'brown'],
+    family: ['mother', 'father', 'sister', 'brother', 'grandma', 'grandpa', 'aunt', 'uncle', 'cousin', 'child']
+};
+
+function showWordsQuestion() {
+    const categories = Object.keys(wordCategories);
+    const category = categories[Math.floor(Math.random() * categories.length)];
+    const words = wordCategories[category];
+    const word = words[Math.floor(Math.random() * words.length)];
+    
+    currentQuestion = { category: category, word: word, answer: 'any' };
+    
+    document.getElementById('questionText').textContent = `I say: ${word.toUpperCase()}`;
+    
+    // Voice: Ask the question
+    speakText(`I say ${word}. You say a related word.`);
+    
+    // Show answer input
+    document.getElementById('answerInput').innerHTML = `
+        <input type="text" id="wordAnswer" placeholder="Say a related word" 
+               style="font-size: 24px; padding: 16px; text-align: center; border: 3px solid #48bb78; border-radius: 16px; width: 100%; max-width: 400px; font-weight: 700;"
+               onkeypress="if(event.key==='Enter') submitWordAnswer()">
+        <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: center;">
+            <button class="btn btn-success" onclick="submitWordAnswer()">Submit Answer</button>
+            <button class="btn btn-secondary" onclick="startGameVoiceInput()" style="background: #48bb78; color: white;">🎤 Say Answer</button>
+        </div>
+    `;
+    
+    setTimeout(() => document.getElementById('wordAnswer')?.focus(), 100);
+}
+
+function submitWordAnswer() {
+    const userAnswer = document.getElementById('wordAnswer')?.value;
+    if (!userAnswer) {
+        showToast('Please enter a word');
+        return;
+    }
+    handleGameAnswer(userAnswer);
+}
+
+// ==================== REMEMBER & REPEAT ====================
+
+function showMemoryQuestion() {
+    const items = ['apple', 'milk', 'bread', 'eggs', 'butter', 'cheese', 'rice', 'pasta', 'chicken', 'fish'];
+    const count = Math.min(3 + Math.floor(gameScore.total / 5), 6); // Start with 3, max 6
+    const sequence = [];
+    for (let i = 0; i < count; i++) {
+        sequence.push(items[Math.floor(Math.random() * items.length)]);
+    }
+    
+    currentQuestion = { sequence: sequence, answer: sequence.join(' ') };
+    
+    document.getElementById('questionText').textContent = 'Listen carefully...';
+    document.getElementById('answerInput').innerHTML = `
+        <div style="font-size: 18px; color: var(--text-secondary); font-weight: 600;">I'll say ${count} items. Remember them!</div>
+    `;
+    
+    // Voice: Say the sequence
+    const sequenceText = sequence.join(', ');
+    speakText(`Remember these: ${sequenceText}. Now tell me what you remember.`);
+    
+    // After voice finishes, show input
+    setTimeout(() => {
+        document.getElementById('questionText').textContent = 'What did I say?';
+        document.getElementById('answerInput').innerHTML = `
+            <input type="text" id="memoryAnswer" placeholder="Tell me the items" 
+                   style="font-size: 20px; padding: 16px; text-align: center; border: 3px solid #f59e0b; border-radius: 16px; width: 100%; max-width: 500px; font-weight: 700;"
+                   onkeypress="if(event.key==='Enter') submitMemoryAnswer()">
+            <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: center;">
+                <button class="btn btn-primary" onclick="submitMemoryAnswer()" style="background: var(--warning-gradient);">Submit Answer</button>
+                <button class="btn btn-secondary" onclick="startGameVoiceInput()" style="background: #f59e0b; color: white;">🎤 Say Answer</button>
+            </div>
+        `;
+        setTimeout(() => document.getElementById('memoryAnswer')?.focus(), 100);
+    }, (count * 1000) + 2000); // Wait for speech + 2 seconds
+}
+
+function submitMemoryAnswer() {
+    const userAnswer = document.getElementById('memoryAnswer')?.value;
+    if (!userAnswer) {
+        showToast('Please enter the items');
+        return;
+    }
+    handleGameAnswer(userAnswer);
+}
+
+// ==================== GAME ANSWER HANDLING ====================
+
+function handleGameAnswer(userAnswer) {
+    gameScore.total++;
+    let isCorrect = false;
+    
+    if (currentGame === 'math') {
+        isCorrect = userAnswer.toString() === currentQuestion.answer;
+    } else if (currentGame === 'words') {
+        // Word game: any answer is correct (encourages engagement)
+        isCorrect = userAnswer.length > 0;
+    } else if (currentGame === 'memory') {
+        // Memory: Check if at least 50% of items are remembered
+        const userItems = userAnswer.toLowerCase().split(/[,\s]+/).filter(w => w.length > 2);
+        const correctItems = currentQuestion.sequence;
+        const matches = userItems.filter(item => correctItems.some(correct => correct.includes(item) || item.includes(correct)));
+        isCorrect = matches.length >= Math.ceil(correctItems.length / 2);
+    }
+    
+    if (isCorrect) {
+        gameScore.correct++;
+        showGameFeedback(true);
+    } else {
+        showGameFeedback(false);
+    }
+    
+    // Update scores
+    document.getElementById('correctScore').textContent = gameScore.correct;
+    document.getElementById('totalScore').textContent = gameScore.total;
+    
+    // Next question after 2 seconds
+    setTimeout(() => {
+        nextQuestion();
+    }, 2000);
+}
+
+function showGameFeedback(isCorrect) {
+    const questionDisplay = document.getElementById('questionDisplay');
+    const emoji = document.getElementById('questionEmoji');
+    
+    if (isCorrect) {
+        emoji.textContent = '✅';
+        questionDisplay.style.background = 'linear-gradient(135deg, rgba(72, 187, 120, 0.2), rgba(56, 161, 105, 0.2))';
+        speakText('Great job!');
+        
+        // Grow a flower
+        const flower = document.createElement('div');
+        flower.textContent = '🌸';
+        flower.style.cssText = 'position: fixed; font-size: 48px; animation: growFlower 2s ease; pointer-events: none; z-index: 9999;';
+        flower.style.left = (Math.random() * 80 + 10) + '%';
+        flower.style.top = (Math.random() * 50 + 25) + '%';
+        document.body.appendChild(flower);
+        setTimeout(() => flower.remove(), 2000);
+    } else {
+        emoji.textContent = '❌';
+        questionDisplay.style.background = 'linear-gradient(135deg, rgba(252, 129, 129, 0.2), rgba(245, 101, 101, 0.2))';
+        speakText('Try again next time!');
+    }
+    
+    setTimeout(() => {
+        emoji.textContent = currentGame === 'math' ? '🌸' : currentGame === 'words' ? '💬' : '🎯';
+        questionDisplay.style.background = 'var(--bg-primary)';
+    }, 2000);
+}
+
+// Add CSS for flower animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes growFlower {
+        0% { transform: scale(0) rotate(0deg); opacity: 0; }
+        50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+        100% { transform: scale(1) rotate(360deg); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+function startGameVoiceInput() {
+    if (!gameRecognition) {
+        showToast('Voice input not available');
+        return;
+    }
+    
+    try {
+        gameRecognition.start();
+        document.getElementById('gameVoiceStatus').style.display = 'block';
+    } catch (error) {
+        console.error('Voice input error:', error);
+    }
+}
+
+function endGame() {
+    if (!confirm(`End game now?\n\nScore: ${gameScore.correct}/${gameScore.total}`)) {
+        return;
+    }
+    
+    // Stop timer
+    if (gameTimerInterval) {
+        clearInterval(gameTimerInterval);
+        gameTimerInterval = null;
+    }
+    
+    // Calculate duration
+    const durationSeconds = Math.floor((Date.now() - gameStartTime) / 1000);
+    
+    // Save to backend
+    const codeHash = currentUser.role === "patient" ? currentUser.codeHash : currentUser.patients[0]?.codeHash;
+    if (codeHash) {
+        apiCall('/api/brain-games/session', 'POST', {
+            codeHash: codeHash,
+            gameType: currentGame,
+            durationSeconds: durationSeconds,
+            correctAnswers: gameScore.correct,
+            totalQuestions: gameScore.total
+        }).then(() => {
+            console.log('Game session saved');
+        }).catch(error => {
+            console.error('Failed to save game session:', error);
+        });
+    }
+    
+    // Show results
+    alert(`🎉 Game Complete!\n\nCorrect: ${gameScore.correct}/${gameScore.total}\nAccuracy: ${Math.round(gameScore.correct / gameScore.total * 100)}%\nTime: ${Math.floor(durationSeconds / 60)}:${(durationSeconds % 60).toString().padStart(2, '0')}`);
+    
+    // Reset game
+    currentGame = null;
+    gameStartTime = null;
+    
+    // Back to selection
+    document.getElementById('gameSelection').style.display = 'block';
+    document.getElementById('gamePlayArea').style.display = 'none';
+}
+
+// Add Brain Games to caregiver dashboard
+function viewGameHistory() {
+    // This will be called by caregivers to see patient's game activity
+    // We'll add this later if needed
+    showToast('Game history feature coming soon!');
 }
 
 window.addEventListener("load", async () => {
