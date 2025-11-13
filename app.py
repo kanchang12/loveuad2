@@ -1806,6 +1806,101 @@ def contact_form():
         logger.error(f"Contact form error: {e}")
         return jsonify({'error': 'Failed to submit'}), 500
 
+# ==================== BRAIN GAMES ====================
+
+@app.route('/api/brain-games/session', methods=['POST'])
+def record_game_session():
+    """Record brain game session"""
+    try:
+        data = request.json
+        code_hash = data.get('codeHash')
+        game_type = data.get('gameType')  # 'math', 'words', 'memory'
+        duration_seconds = data.get('durationSeconds')
+        correct_answers = data.get('correctAnswers', 0)
+        total_questions = data.get('totalQuestions', 0)
+        
+        if not all([code_hash, game_type, duration_seconds]):
+            return jsonify({'error': 'Missing fields'}), 400
+        
+        # Get patient data
+        patient = db_manager.get_patient_data(code_hash)
+        if not patient:
+            return jsonify({'error': 'Patient not found'}), 404
+        
+        patient_data = decrypt_data(patient['encrypted_data'])
+        
+        # Initialize game sessions array
+        if 'gameSessions' not in patient_data:
+            patient_data['gameSessions'] = []
+        
+        # Add new session
+        session = {
+            'gameType': game_type,
+            'durationSeconds': duration_seconds,
+            'correctAnswers': correct_answers,
+            'totalQuestions': total_questions,
+            'accuracy': round((correct_answers / total_questions * 100) if total_questions > 0 else 0, 1),
+            'playedAt': datetime.utcnow().isoformat()
+        }
+        
+        patient_data['gameSessions'].append(session)
+        
+        # Keep only last 100 sessions
+        patient_data['gameSessions'] = patient_data['gameSessions'][-100:]
+        
+        # Save back to database
+        encrypted_data = encrypt_data(patient_data)
+        with db_manager.conn.cursor() as cur:
+            cur.execute(
+                "UPDATE patients SET encrypted_data = %s WHERE code_hash = %s",
+                (encrypted_data, code_hash)
+            )
+            db_manager.conn.commit()
+        
+        logger.info(f"Game session recorded: {game_type} - {duration_seconds}s")
+        return jsonify({'success': True}), 200
+        
+    except Exception as e:
+        logger.error(f"Game session recording error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/brain-games/history/<code_hash>', methods=['GET'])
+def get_game_history(code_hash):
+    """Get game session history for caregiver dashboard"""
+    try:
+        patient = db_manager.get_patient_data(code_hash)
+        if not patient:
+            return jsonify({'error': 'Patient not found'}), 404
+        
+        patient_data = decrypt_data(patient['encrypted_data'])
+        sessions = patient_data.get('gameSessions', [])
+        
+        # Calculate statistics
+        total_sessions = len(sessions)
+        total_time = sum(s['durationSeconds'] for s in sessions)
+        avg_accuracy = round(sum(s['accuracy'] for s in sessions) / total_sessions if total_sessions > 0 else 0, 1)
+        
+        # Last 7 days activity
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        recent_sessions = [
+            s for s in sessions 
+            if datetime.fromisoformat(s['playedAt'].replace('Z', '+00:00')) > seven_days_ago
+        ]
+        
+        stats = {
+            'totalSessions': total_sessions,
+            'totalMinutes': round(total_time / 60, 1),
+            'averageAccuracy': avg_accuracy,
+            'last7Days': len(recent_sessions),
+            'sessions': sessions[-20:]  # Last 20 sessions
+        }
+        
+        return jsonify({'success': True, 'stats': stats}), 200
+        
+    except Exception as e:
+        logger.error(f"Get game history error: {e}")
+        return jsonify({'error': str(e)}), 500
+
 # ==================== END OF DUPLICATE ROUTES ====================
 
 # ==================== MAIN ====================
