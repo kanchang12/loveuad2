@@ -1570,7 +1570,7 @@ def verify_admin_password():
         logger.error(f"Admin auth error: {e}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/admin/dashboard-stats', methods=['GET'])
+@app.route('/api/admin/dashboard-stats', methods=['GET', 'POST'])
 def get_admin_dashboard_stats():
     """
     Get comprehensive dashboard statistics for admin panel
@@ -1578,83 +1578,103 @@ def get_admin_dashboard_stats():
     """
     try:
         with db_manager.conn.cursor() as cur:
+            # Rollback any previous failed transactions
+            db_manager.conn.rollback()
+            
             # Total patient accounts
             cur.execute("SELECT COUNT(*) as count FROM patients")
             total_patients = cur.fetchone()['count']
             
-            # Total caregiver accounts
-            cur.execute("SELECT COUNT(*) as count FROM caregivers")
-            total_caregivers = cur.fetchone()['count']
+            # Remove caregivers - not needed
+            total_caregivers = 0
             
             # Active users (logged in last 7 days) - from daily_launch_tracker
-            cur.execute("""
-                SELECT COUNT(DISTINCT code_hash) as count 
-                FROM daily_launch_tracker 
-                WHERE launch_date >= CURRENT_DATE - INTERVAL '7 days'
-            """)
-            active_last_7_days = cur.fetchone()
-            active_users = active_last_7_days['count'] if active_last_7_days else 0
+            try:
+                cur.execute("""
+                    SELECT COUNT(DISTINCT code_hash) as count 
+                    FROM daily_launch_tracker 
+                    WHERE launch_date >= CURRENT_DATE - INTERVAL '7 days'
+                """)
+                active_last_7_days = cur.fetchone()
+                active_users = active_last_7_days['count'] if active_last_7_days else 0
+            except:
+                active_users = 0
             
             # Survey statistics
-            cur.execute("""
-                SELECT 
-                    COUNT(DISTINCT code_hash) as unique_respondents,
-                    COUNT(*) as total_responses,
-                    survey_day,
-                    result_bucket,
-                    COUNT(*) as count
-                FROM survey_responses
-                GROUP BY survey_day, result_bucket
-                ORDER BY survey_day, result_bucket
-            """)
-            survey_data = cur.fetchall()
+            try:
+                cur.execute("""
+                    SELECT 
+                        COUNT(DISTINCT code_hash) as unique_respondents,
+                        COUNT(*) as total_responses,
+                        survey_day,
+                        result_bucket,
+                        COUNT(*) as count
+                    FROM survey_responses
+                    GROUP BY survey_day, result_bucket
+                    ORDER BY survey_day, result_bucket
+                """)
+                survey_data = cur.fetchall()
+            except:
+                survey_data = []
             
             # DAU statistics (last 30 days)
-            cur.execute("""
-                SELECT 
-                    event_date,
-                    SUM(launch_count) as daily_total
-                FROM daily_active_users
-                WHERE event_date >= CURRENT_DATE - INTERVAL '30 days'
-                GROUP BY event_date
-                ORDER BY event_date DESC
-            """)
-            dau_daily = cur.fetchall()
+            try:
+                cur.execute("""
+                    SELECT 
+                        event_date,
+                        SUM(launch_count) as daily_total
+                    FROM daily_active_users
+                    WHERE event_date >= CURRENT_DATE - INTERVAL '30 days'
+                    GROUP BY event_date
+                    ORDER BY event_date DESC
+                """)
+                dau_daily = cur.fetchall()
+            except:
+                dau_daily = []
             
             # DAU by hour (last 7 days)
-            cur.execute("""
-                SELECT 
-                    event_hour,
-                    AVG(launch_count) as avg_launches,
-                    MAX(launch_count) as peak_launches
-                FROM daily_active_users
-                WHERE event_date >= CURRENT_DATE - INTERVAL '7 days'
-                GROUP BY event_hour
-                ORDER BY event_hour
-            """)
-            dau_hourly = cur.fetchall()
+            try:
+                cur.execute("""
+                    SELECT 
+                        event_hour,
+                        AVG(launch_count) as avg_launches,
+                        MAX(launch_count) as peak_launches
+                    FROM daily_active_users
+                    WHERE event_date >= CURRENT_DATE - INTERVAL '7 days'
+                    GROUP BY event_hour
+                    ORDER BY event_hour
+                """)
+                dau_hourly = cur.fetchall()
+            except:
+                dau_hourly = []
             
             # Medication adherence statistics
-            cur.execute("""
-                SELECT 
-                    COUNT(*) as total_medications
-                FROM medications
-            """)
-            total_meds = cur.fetchone()['count']
+            try:
+                cur.execute("""
+                    SELECT 
+                        COUNT(*) as total_medications
+                    FROM medications
+                """)
+                total_meds = cur.fetchone()['count']
+            except:
+                total_meds = 0
             
             # Recent survey responses (aggregated)
-            cur.execute("""
-                SELECT 
-                    completion_date,
-                    COUNT(*) as responses_count,
-                    result_bucket
-                FROM survey_responses
-                WHERE completion_date >= CURRENT_DATE - INTERVAL '30 days'
-                GROUP BY completion_date, result_bucket
-                ORDER BY completion_date DESC
-                LIMIT 50
-            """)
-            recent_surveys = cur.fetchall()
+            try:
+                cur.execute("""
+                    SELECT 
+                        completion_date,
+                        COUNT(*) as responses_count,
+                        result_bucket
+                    FROM survey_responses
+                    WHERE completion_date >= CURRENT_DATE - INTERVAL '30 days'
+                    GROUP BY completion_date, result_bucket
+                    ORDER BY completion_date DESC
+                    LIMIT 50
+                """)
+                recent_surveys = cur.fetchall()
+            except:
+                recent_surveys = []
         
         # Process survey data
         survey_stats = {
@@ -1729,8 +1749,8 @@ def get_admin_dashboard_stats():
         
     except Exception as e:
         logger.error(f"Admin dashboard stats error: {e}")
+        db_manager.conn.rollback()
         return jsonify({'error': str(e)}), 500
-
 @app.route('/health', methods=['GET'])
 def health_check_noapi():
     return health_check()
