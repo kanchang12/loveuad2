@@ -699,6 +699,10 @@ def index_page():
     """Serve index page"""
     return render_template("index.html")
 
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
 
 
 
