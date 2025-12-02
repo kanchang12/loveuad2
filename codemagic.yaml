@@ -1,0 +1,58 @@
+workflows:
+  ios-workflow:
+    name: iOS Build and Publish
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.loveuad.app
+      vars:
+        # Xcode configuration
+        XCODE_WORKSPACE: "src/App/App.xcworkspace" # Adjust if different
+        XCODE_SCHEME: "App" # Adjust to your scheme name
+        BUNDLE_ID: "com.loveuad.app"
+        APP_STORE_APPLE_ID: 1234567890 # You'll get this from App Store Connect
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Get CocoaPods dependencies (if needed)
+        script: |
+          if [ -f "src/App/Podfile" ]; then
+            cd src/App
+            pod install
+          fi
+      - name: Increment build number
+        script: |
+          cd src/App
+          agvtool new-version -all $(($(app-get-version-number) + 1))
+      - name: Build ipa for distribution
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      email:
+        recipients:
+          - kanchan.g12@gmail.com
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        auth: integration
+        # Submit to TestFlight
+        submit_to_testflight: true
+        beta_groups:
+          - Beta Testers
+        # Uncomment to submit to App Store
+        # submit_to_app_store: false
