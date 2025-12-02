@@ -10,81 +10,42 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.loveuad.carecircle
       vars:
-        # Apple Developer Account
         TEAM_ID: "7PA725G59N"
         BUNDLE_ID: "com.loveuad.carecircle"
-        
-        # Xcode Project Configuration
         XCODE_PROJECT: "src/LoveUAD.xcodeproj"
         XCODE_SCHEME: "LoveUAD"
-        
-        # App Store Details
         APP_NAME: "LoveUAD"
-        
       xcode: latest
       cocoapods: default
-      
     scripts:
-      - name: Set up code signing with Apple Developer
+      - name: Set up code signing
         script: |
-          echo "Setting up code signing for Team ID: $TEAM_ID"
-          echo "Bundle ID: $BUNDLE_ID"
           xcode-project use-profiles
-          
-      - name: Install CocoaPods dependencies
+      - name: Install CocoaPods
         script: |
           if [ -f "src/Podfile" ]; then
-            echo "Installing CocoaPods dependencies..."
             cd src
             pod install
-          else
-            echo "No Podfile found, skipping CocoaPods"
           fi
-          
       - name: Set bundle identifier
         script: |
           cd src
           /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "LoveUAD/Info.plist" || true
-          
-      - name: Increment build number
+      - name: Build iOS app
         script: |
-          cd src
-          BUILD_NUMBER=$(($(app-get-version-number) + 1))
-          agvtool new-version -all $BUILD_NUMBER
-          echo "Build number set to: $BUILD_NUMBER"
-          
-      - name: Build iOS app for App Store
-        script: |
-          echo "Building $APP_NAME for App Store distribution"
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME" \
-            --config Release
-            
+            --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
-      
     publishing:
       email:
         recipients:
           - kanchan.g12@gmail.com
-        notify:
-          success: true
-          failure: true
-          
       app_store_connect:
-        # Use the integration configured in Codemagic
         auth: integration
-        
-        # Submit to TestFlight for beta testing
         submit_to_testflight: true
-        
-        # Beta testing group name (you'll create this in App Store Connect)
         beta_groups:
           - Beta Testers
-          - Internal Testing
-        
-        # Set to true when ready for production App Store release
         submit_to_app_store: false
