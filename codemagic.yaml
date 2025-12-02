@@ -8,7 +8,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.loveuad.app
+        bundle_identifier: com.loveuad.carecircle
       vars:
         # Xcode configuration
         XCODE_WORKSPACE: "src/App/App.xcworkspace" # Adjust if different
